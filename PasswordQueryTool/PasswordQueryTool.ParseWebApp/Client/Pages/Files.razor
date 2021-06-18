@@ -1,0 +1,50 @@
+﻿@page "/start/"
+@inject IImportProvider _provider
+@inject NavigationManager _nav
+@inject ISnackbar _snacks
+<MudContainer Class="p-4 pt-3">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick='() => _nav.NavigateTo("/")'>Back</MudButton>
+    <MudPaper Class="p-2 mt-4 mud-theme-secondary" Elevation="1">
+        <MudText Typo="Typo.h6">Importable files:</MudText>
+    </MudPaper>
+    <MudGrid Class="mt-2">
+
+        @if (_files is null)
+        {
+            <MudItem xs="12">
+                <MudText Color="Color.Dark" Typo="Typo.h6">
+                    No files in storage.
+                </MudText>
+
+            </MudItem>
+
+            return;
+        }
+
+        @foreach (var f in _files)
+        {
+            <MudItem xs="3">
+                <MudButton Color="Color.Primary" OnClick="() => Start(f)">@f</MudButton>
+            </MudItem>
+        }
+
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private IEnumerable<string> _files = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _files = await _provider.GetFiles();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task Start(string filename)
+    {
+        await _provider.StartImport(filename);
+
+        _snacks.Add("Started import!", Severity.Info);
+    }
+}

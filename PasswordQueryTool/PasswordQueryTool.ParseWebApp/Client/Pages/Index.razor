@@ -1,0 +1,123 @@
+﻿@page "/"
+@inject IImportProvider _provider
+@inject NavigationManager _nav
+
+<MudContainer Class="p-4 pt-3">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick='() => _nav.NavigateTo("/start/")'>New Import</MudButton>
+    <MudPaper Class="p-2 mt-4 mud-theme-secondary" Elevation="1">
+        <MudText Typo="Typo.h6">Currently running jobs:</MudText>
+    </MudPaper>
+    <MudGrid Class="mt-2">
+
+        @if (_imports is null)
+        {
+            <MudText Color="Color.Dark" Typo="Typo.h6">
+                No Jobs running.
+            </MudText>
+
+            return;
+        }
+
+        @foreach (var i in _imports)
+        {
+            <MudItem md="4">
+                <MudCard>
+                    <MudCardHeader Class="pb-2 mud-theme-secondary">
+                        <CardHeaderAvatar>
+                            <MudAvatar Color="Color.Surface">
+                                @switch (i.State)
+                                {
+                                    case ImportState.Analyzing:
+                                        <MudIcon Icon="@Icons.Filled.Search" Size="Size.Large" Color="Color.Info"></MudIcon>
+                                        break;
+
+                                    case ImportState.Importing:
+                                        <MudIcon Icon="@Icons.Filled.Settings" Size="Size.Large" Color="Color.Warning"></MudIcon>
+                                        break;
+
+                                    case ImportState.Canceled:
+                                        <MudIcon Icon="@Icons.Filled.Delete" Size="Size.Large" Color="Color.Error"></MudIcon>
+                                        break;
+
+                                    default:
+                                        <MudIcon Icon="@Icons.Filled.DoneAll" Size="Size.Large" Color="Color.Success"></MudIcon>
+                                        break;
+                                }
+                            </MudAvatar>
+                        </CardHeaderAvatar>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.subtitle1">
+                                @i.Name (@i.Id)
+                            </MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Class="pt-1">
+                        <MudGrid Class="pt-4">
+                            <MudItem xs="12" Class="py-1">
+                                <MudPaper Class="d-flex flex-row justify-space-between py-2 px-1 mud-theme-tertiary" Elevation="0">
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">Total Chunks</MudPaper>
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">@i.ChunksAmount</MudPaper>
+                                </MudPaper>
+                            </MudItem>
+                            <MudItem xs="12" Class="py-1">
+                                <MudPaper Class="d-flex flex-row justify-space-between py-2 px-1 mud-theme-tertiary" Elevation="0">
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">Finished Chunks</MudPaper>
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">@i.ChunksFinishedAmount</MudPaper>
+                                </MudPaper>
+                            </MudItem>
+                            <MudItem xs="12" Class="py-1">
+                                <MudPaper Class="d-flex flex-row justify-space-between py-2 px-1 mud-theme-tertiary" Elevation="0">
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">Imported Lines</MudPaper>
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">@i.LinesFinished</MudPaper>
+                                </MudPaper>
+                            </MudItem>
+                            <MudItem xs="12" Class="py-1">
+                                <MudPaper Class="d-flex flex-row justify-space-between py-2 px-1 mud-theme-tertiary" Elevation="0">
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">Invalid Lines</MudPaper>
+                                    <MudPaper Elevation="0" Class="pa-1 mx-1 mud-theme-transparent">@i.InvalidLines</MudPaper>
+                                </MudPaper>
+                            </MudItem>
+                            <MudItem xs="12" Class="py-2">
+                                <MudProgressLinear Size="Size.Large" Color="Color.Primary" Value="i.ChunksFinishedAmount" Min="0" Max="i.ChunksAmount" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardContent>
+                    <MudCardActions>
+                        @if (i.State == ImportState.Analyzing || i.State == ImportState.Importing)
+                        {
+                            <MudButton Color="Color.Error" @onclick="() => _provider.CancelImport(i.Id)">Cancel</MudButton>
+                        }
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+
+    </MudGrid>
+
+</MudContainer>
+
+@code {
+    private System.Timers.Timer _t = new();
+
+    private IEnumerable<ImportDTO> _imports = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _imports = await _provider.GetRunningImports();
+
+        _t.Interval = 5000;
+
+        _t.Elapsed += async (_, _) => await GetUpdate();
+
+        _t.Start();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetUpdate()
+    {
+        _imports = await _provider.GetRunningImports();
+
+        InvokeAsync(() => StateHasChanged());
+    }
+}

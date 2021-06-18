@@ -1,0 +1,98 @@
+﻿@page "/search/username/"
+
+@inject IQueryService _queryService
+@using PasswordQueryTool.Model
+
+<MudContainer Class="py-3 px-4">
+    <MudText Color="Color.Dark" Typo="Typo.h5">Search all passwords for a username</MudText>
+    <MudPaper Elevation="2" Class="d-flex p-3 rounded-0">
+        <MudTextField InputType="InputType.Email" FullWidth="false" @bind-Value="_user" Label="Username to search"></MudTextField>
+        <MudButton Class="rounded-0 ml-1" Color="Color.Primary" Variant="Variant.Filled" OnClick="Search">Search</MudButton>
+    </MudPaper>
+
+    @if (_message is not null)
+    {
+        <MudText Color="Color.Dark" Class="my-2" Typo="Typo.h6">@_message</MudText>
+    }
+
+    <MudTable @ref="_table" ServerData="@(new Func<TableState, Task<TableData<LoginData>>>(ServerReload))"
+              Elevation="2" Class="rounded-0 mt-3" FixedHeader="true" Height="500px">
+        <HeaderContent>
+            <MudTh>Email</MudTh>
+            <MudTh>Password</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>
+                @context.Email.GetFullEmail()
+            </MudTd>
+            <MudTd>
+                @context.Password
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+<MudOverlay @bind-Visible="_overlayOn" DarkBackground="true">
+    <MudPaper Elevation="1" Class="p-4">
+        <MudText>Currently searching millions of datasets...</MudText>
+        <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+    </MudPaper>
+</MudOverlay>
+
+@code {
+    private string _message = "Please provide a username to query passwords for.";
+    private bool _overlayOn;
+    private string _user = string.Empty;
+    private string _tableSearchString = string.Empty;
+
+    private MudTable<LoginData> _table;
+
+    private async Task Search()
+    {
+        _tableSearchString = _user;
+
+        await _table.ReloadServerData();
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    private async Task<TableData<LoginData>> ServerReload(TableState state)
+    {
+        if (string.IsNullOrWhiteSpace(_tableSearchString))
+        {
+            _message = "Please provide an username to query passwords for.";
+
+            return new TableData<LoginData>() { TotalItems = 0, Items = Enumerable.Empty<LoginData>() };
+        }
+
+        _overlayOn = true;
+
+        try
+        {
+            var data = await _queryService.GetLoginDataByUsername(new QueryRequest() { Filter = _tableSearchString });
+
+            var int32val = (int)data.TotalItemCount;
+
+            _message = (data.Data.Length == 0) ? "The query yielded no results" : null;
+
+            _overlayOn = false;
+
+            StateHasChanged();
+
+            return new TableData<LoginData>() { TotalItems = int32val, Items = data.Data };
+        }
+        catch (Exception e)
+        {
+            _message = "Error with query: Please make sure the username is valid.";
+
+            _overlayOn = false;
+
+            StateHasChanged();
+
+            return new TableData<LoginData>() { TotalItems = 0, Items = Enumerable.Empty<LoginData>() };
+        }
+    }
+}

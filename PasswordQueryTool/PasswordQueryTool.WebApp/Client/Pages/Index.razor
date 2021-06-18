@@ -1,0 +1,79 @@
+﻿@page "/"
+
+@inject NavigationManager Navigation
+@inject IQueryService Query 
+
+@using PasswordQueryTool.Model
+
+<MudContainer Class="mt-4 px-8" MaxWidth="MaxWidth.False">
+    <MudText Color="Color.Primary" Typo="Typo.h5" Class="mb-2">Passwords in DB: @totalAmount</MudText>
+    <MudGrid>
+        <MudItem xs="4">
+            <MudCard Class="mud-theme-tertiary p-0">
+                <MudCardContent Class="pb-0">
+                    <MudText Typo="Typo.subtitle1">
+                        Search passwords for a specific email address
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick='() => Navigation.NavigateTo("/search/email/")'>
+                        Go
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="4">
+            <MudCard Class="mud-theme-tertiary p-0">
+                <MudCardContent Class="pb-0">
+                    <MudText Typo="Typo.subtitle1">
+                        Search passwords for a specific username
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick='() => Navigation.NavigateTo("/search/username/")'>
+                        Go
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="4">
+            <MudCard Class="mud-theme-tertiary p-0">
+                <MudCardContent Class="pb-0">
+                    <MudText Typo="Typo.subtitle1">
+                        Browse the 100 most common passwords for a domain
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick='() => Navigation.NavigateTo("/common/domain/")'>
+                        Go
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="4">
+            <MudCard Class="mud-theme-tertiary p-0">
+                <MudCardContent Class="pb-0">
+                    <MudText Typo="Typo.subtitle1">
+                        Browse the 100 most common passwords for a top level domain
+                    </MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick='() => Navigation.NavigateTo("/common/tld/")'>
+                        Go
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private long totalAmount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        totalAmount = await Query.GetTotalEntries();
+
+        await base.OnInitializedAsync();
+    }
+}

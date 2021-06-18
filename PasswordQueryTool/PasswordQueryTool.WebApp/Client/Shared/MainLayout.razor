@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+
+@using PasswordQueryTool.WebApp.Client.Themes
+
+<MudThemeProvider Theme="new BlueTheme()" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo="Typo.h5" Class="ml-3">PassSearch</MudText>
+        <MudAppBarSpacer />
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" Variant="@DrawerVariant.Temporary" DisableOverlay="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <MudNavLink Href="/">Home</MudNavLink>
+        <MudNavGroup Title="Search" @bind-Expanded="_expandedSearch">
+            <MudNavLink Href="search/email">by Email</MudNavLink>
+            <MudNavLink Href="search/username">by Username</MudNavLink>
+        </MudNavGroup>
+        <MudNavGroup Title="Most Common Passwords" @bind-Expanded="_expandedCommon">
+            <MudNavLink Href="common/domain">by Domain</MudNavLink>
+            <MudNavLink Href="common/tld">by Top Level Domain</MudNavLink>
+        </MudNavGroup>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    bool _expandedSearch = false;
+    bool _expandedCommon = false;
+    bool _drawerOpen = false;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

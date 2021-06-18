@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+
+@using PasswordQueryTool.ParseWebApp.Client.Theme
+
+<MudThemeProvider Theme="new AdminGreenTheme()" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText Typo="Typo.h5" Class="ml-3">PassSearch AdminTool</MudText>
+        <MudAppBarSpacer />
+    </MudAppBar>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>

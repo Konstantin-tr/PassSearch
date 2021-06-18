@@ -1,0 +1,61 @@
+version: '3.4'
+
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.1
+
+  postgres:
+    image: postgres:13.3
+
+  passwordquerytool.backend.services.databaseaccess:
+    image: ${DOCKER_REGISTRY-}passwordquerytoolbackendservicesdatabaseaccess
+    build:
+      context: .
+      dockerfile: PasswordQueryTool.Backend.Services.DatabaseAccess/Dockerfile
+    depends_on:
+      - es01
+      - rabbitmq
+
+  minio:
+    image: minio/minio
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+
+  passwordquerytool.backend.services.parsing:
+    image: ${DOCKER_REGISTRY-}passwordquerytoolbackendservicesparsing
+    build:
+      context: .
+      dockerfile: PasswordQueryTool.Backend.Services.Parsing/Dockerfile
+    depends_on:
+      - minio
+      - rabbitmq
+      - passwordquerytool.backend.services.databaseaccess
+      - postgres
+
+  passwordquerytool.webapp.server:
+    image: ${DOCKER_REGISTRY-}passwordquerytoolwebappserver
+    build:
+      context: .
+      dockerfile: PasswordQueryTool.WebApp/Server/Dockerfile
+    depends_on:
+      - passwordquerytool.backend.services.databaseaccess
+
+  passwordquerytool.apigateway:
+    image: ${DOCKER_REGISTRY-}passwordquerytoolapigateway
+    build:
+      context: .
+      dockerfile: PasswordQueryTool.ApiGateway/Dockerfile
+    depends_on:
+      - passwordquerytool.backend.services.databaseaccess
+      - passwordquerytool.webapp.server
+
+
+  passwordquerytool.parsewebapp.server:
+    image: ${DOCKER_REGISTRY-}passwordquerytoolparsewebappserver
+    build:
+      context: .
+      dockerfile: PasswordQueryTool.ParseWebApp/Server/Dockerfile
+    depends_on:
+      - passwordquerytool.backend.services.parsing
+
