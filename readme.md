@@ -12,7 +12,23 @@ The tool was developed by Severin M. and Konstantin S. as part of an assignment.
 
 This section describes how the service can be setup, what requirements need to be met in order to allow the service to start and how it can be used.
 
-### 1.1. Compilation and Startup
+### 1.1. Prerequisites
+To compile and debug the tool in Visual Studio, the following components are required:
+
+- Visual Studio 2019
+  - Installed Packages:
+    - Asp.Net and Web Development
+    - .Net 5 Runtime      
+    - Container-Development Tools
+    - Platform-independent .Net Core Development
+    - .Net-Desktop Development
+- Docker / Docker Desktop
+- .Net 5 Runtime (on System or via Visual Studio)
+
+Configuration:
+- Docker-Compose Override File (see "1.5.1. Docker Compose Override")
+
+### 1.2. Compilation and Startup
 
 The source code can be pulled and compiled using Visual Studio. In order to launch the entire system, the Docker Compose project should be selected as the starting project. The docker environment manages all required services that make the service work. Some of the initial values will need to be overwritten in the configuration files and the docker-compose.override.yml file. An example configuration and explanation can be found in the section "1.5. Docker Compose".
 
@@ -114,7 +130,7 @@ Using the Parsing API different tools can be written that allow management of th
 Both APIs can be tested marvelously using the swagger API documentation as described in "1.2.2. APIs"
 
 ### 1.3. Configuration
-All custom services (2.1.2.) need special configuration using the ASP.NET configuration infrastructure - in this case appsettings.json.
+All custom services (2.1.2.) need special configuration using the ASP.NET configuration infrastructure - in this case appsettings.json or appsettings.development.json. These files can be found in the folders of the DatabaseAccess- and Parsing-Services.
 
 Among all configuration options are:
   - ElasticSearch host (DatabaseAccess Service)
@@ -156,7 +172,7 @@ It also introduces some dependencies to technically ensure that all infrastructu
 #### 1.5.1. Docker Compose Override
 
 The Docker Compose file only outlines the general infrastructure, however, some additional configuration may be performed using the docker-compose.override.yml file.
-This file should be only saved locally and will differ from environment to environment. Requirements include bindings to filepaths and port configurations as well as environment configurations such as passwords and usernames.
+This file should only be saved locally and will differ from environment to environment. Requirements include bindings to filepaths and port configurations as well as environment configurations such as passwords and usernames. The file needs to be placed in the exact same location as the docker-compose.yml
 
 The following is an example of a possible configuration for the override file where `[MY FILE PATH]` equals a path of your choosing where docker should mount the services' folders to. This configuration needs to match the values configured in the Section "1.3. Configuration". It alone should suffice to allow the system to start and function correctly. The most important part is to keep the correct ports for the services if you want to make them available outside of the docker environment and to ensure the environment variables are correct.
 
