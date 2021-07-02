@@ -129,8 +129,13 @@ Using the Parsing API different tools can be written that allow management of th
 
 Both APIs can be tested marvelously using the swagger API documentation as described in "1.2.2. APIs"
 
+#### 1.2.3. Troubleshooting
+- Sometimes Docker containers can start slower than expected. In this case, a database may not be running when the services try to access it, which will throw an exception in VS2019. In order to handle this issue, simply stop the debugging process and restart it. The Docker containers should then be ready to receive requests from the services, when the services first try to access them.
+- If something has gone wrong and the docker network is not working properly, you can delete the volume-folders from your system. Then right click the project solution in VS2019 and select "Clean Project Solution". This will completely clean the docker network and all containers, so you can restart from a fresh state.
+- If the website starts and does not function properly, it may have started before the services are properly connected. To solve this issue, simply reload the website.
+
 ### 1.3. Configuration
-All custom services (2.1.2.) need special configuration using the ASP.NET configuration infrastructure - in this case appsettings.json or appsettings.development.json. These files can be found in the folders of the DatabaseAccess- and Parsing-Services.
+All custom services (2.1.2.) need special configuration using the ASP.NET configuration infrastructure - in this case appsettings.json or appsettings.development.json. These files can be found in the folders of the DatabaseAccess- and Parsing-Services. The ports through which the different APIs and Services can be access, can be configured via the docker-compose file (see Section "1.5. Docker Compose").
 
 Among all configuration options are:
   - ElasticSearch host (DatabaseAccess Service)
